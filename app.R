@@ -5,291 +5,280 @@
 library(shiny)
 library(markdown)
 library(samplesizr)
+library(tidyverse)
 
 max_sliders <- 10
 
-ui <- navbarPage("samplesizr!",
-  navbarMenu("Two groups",
-    tabPanel("z Test",
-      sidebarLayout(
-        sidebarPanel(
-          radioButtons("z_type",
-            "Type of Alternative",
-            c("One-Sided" = "z_one",
-            "Two-Sided" = "z_two"
-            ),
-            "z_two"
-          ),
-          sliderInput("z_effect",
-            "Effect size on alternative",
-            min = .01,
-            max = 50,
-            value = 10, 
-            step = .01
-          ),
-          sliderInput("z_sd",
-            "Standard deviation of sample",
-            min = 0.1,
-            max = 100,
-            value = 20, 
-            step = .01
-          ),
-          sliderInput("z_alpha",
-            "Desired Type I Error alpha",
-            min = .005,
-            max = .2,
-            value = .05, 
-            step = .005
-          ),
-          sliderInput("z_pwr",
-            "Desired power",
-            min = 0.5,
-            max = .99,
-            value = .8, 
-            step = .01
-          ),
-          sliderInput("z_r",
-            "Desired Allocation",
-            min = 0.1,
-            max = 10,
-            value = 1, 
-            step = .1
-          )
+ui <- navbarPage("samplesizr",
+  tabPanel("Overview",
+    includeMarkdown("README.md")
+  ),
+  tabPanel("Z-Test",
+    sidebarLayout(
+      sidebarPanel(
+        actionButton("z_button", "Update output"),
+        h3("Assumptions:"),
+        tags$div(title = "Supercoole Erklärung!",
+          numericInput("z_mean_x", label = h5("Mean of control group"), 
+                       value = 0, step = 0.025)
         ),
-        mainPanel(
-          verbatimTextOutput("ztest")
-        )
-      )
-    ),
-    tabPanel("t Test",
-      sidebarLayout(
-        sidebarPanel(
-          sliderInput("t_effect",
-            "Effect size on alternative",
-            min = 0,
-            max = 50,
-            value = 10, 
-            step = .01
-          ),
-          sliderInput("t_sd",
-            "Standard deviation of sample",
-            min = 0.1,
-            max = 100,
-            value = 20, 
-            step = .01
-          ),
-          sliderInput("t_alpha",
-            "Desired Type I Error alpha",
-            min = .005,
-            max = .2,
-            value = .05, 
-            step = .005
-          ),
-          sliderInput("t_pwr",
-           "Desired power",
-           min = 0.5,
-           max = .99,
-           value = .8, 
-           step = .01
-          ),
-          sliderInput("t_r",
-           "Desired Allocation",
-           min = 0.1,
-           max = 10,
-           value = 1, 
-           step = .1
-          )
+        numericInput("z_mean_y", label = h5("Mean of intervention group"), 
+                     value = 0.3, step = 0.025), 
+        numericInput("z_sd_y_and_x", label = h5("Standard deviation in both group"), 
+                     value = 0.3, step = 0.025), 
+        # TODO: verify that values are sensible / minimium differenc of ??? 
+        tags$br(),
+        h3("Operatic characteristics:"),
+        sliderInput("z_alpha",
+          "Maximal type I error rate",
+          min = .005,
+          max = .2,
+          value = .05, 
+          step = .005
         ),
-        mainPanel(
-          verbatimTextOutput("ttest")
-        )
-      )
-    ),
-    tabPanel("ANCOVA",
-      sidebarLayout(
-        sidebarPanel(
-          sliderInput("ancova_effect",
-            "Effect size on alternative",
-            min = 0,
-            max = 50, 
-            value = 10, 
-            step = .01
-          ),
-          sliderInput("ancova_corr",
-            "Correlation to covariate C",
-             min = 0,
-             max = 1,
-             value = .3, 
-             step = .01
-          ),
-          sliderInput("ancova_sd",
-            "Standard deviation of sample",
-            min = .01,
-            max = 100,
-            value = 20, 
-            step = .01
-          ),
-          sliderInput("ancova_alpha",
-             "Desired Type I Error alpha",
-             min = .005,
-             max = .2,
-             value = .05, 
-             step = .005
-          ),
-          sliderInput("ancova_pwr",
-            "Desired power",
-            min = 0.5,
-            max = .99,
-            value = .8, 
-            step = .01
-          ),
-          sliderInput("ancova_r",
-            "Desired Allocation",
-            min = 0.1,
-            max = 10,
-            value = 1, 
-            step = .1
-          ),
-          checkboxInput("ancova_gs",
-            "Guenther/Schouten correction",
-            value = TRUE
-          )
+        sliderInput("z_pwr",
+          "Desired power",
+          min = 0.5,
+          max = .99,
+          value = .8, 
+          step = .01
         ),
-        mainPanel(
-          verbatimTextOutput("ancova")
-        )
-      )
-    ),
-    tabPanel("Chi-square Test",
-      sidebarLayout(
-        sidebarPanel(
-          sliderInput("chisq_p_Y",
-            "Event rate of group Y on alternative",
-            min = 0,
-            max = 1,
-            value = .5, 
-            step = .01
-          ),
-          sliderInput("chisq_p_X",
-            "Event rate of group X on alternative",
-            min = 0,
-            max = 1,
-            value = .3, 
-            step = .01
-          ),
-          sliderInput("chisq_alpha",
-            "Desired Type I Error alpha",
-            min = .005,
-            max = .2,
-            value = .05, 
-            step = .005
-          ),
-          sliderInput("chisq_pwr",
-            "Desired power",
-            min = 0.5,
-            max = .99,
-            value = .8, 
-            step = .01
-          ),
-          sliderInput("chisq_r",
-            "Desired Allocation",
-            min = 0.1,
-            max = 10,
-            value = 1, 
-            step = .1
-          ),
-          checkboxInput("chisq_power.exact",
-            "Berechnung zur exakten Power",
-            value = TRUE
-          )
+        tags$br(),
+        h3("Other:"),
+        sliderInput("z_r",
+          "Desired Allocation",
+          min = 0.1,
+          max = 10,
+          value = 1, 
+          step = .1
         ),
-        mainPanel(
-          verbatimTextOutput("chisq")
-        )
+        tags$br()
+      ),
+      mainPanel(
+        plotOutput("z_assumptions_plot"),
+        verbatimTextOutput("ztest")
       )
     )
   ),
-  navbarMenu("k > 2 groups",
-    tabPanel("f Test",
-      sidebarLayout(
-        sidebarPanel(
-          sliderInput("f_n.groups", 
-            "Number of groups",
-            min = 3,
-            max = 10,
-            value = 3,
-            step = 1
-          ),
-          uiOutput(
-            "f_mu_A"
-          ),
-          sliderInput("f_sd",
-                      "Standard deviation of sample",
-                      min = 0.1,
-                      max = 100,
-                      value = 20, 
-                      step = .01
-          ),
-          sliderInput("f_alpha",
-            "Desired Type I Error alpha",
-            min = .005,
-            max = .2,
-            value = .05, 
-            step = .005
-          ),
-          sliderInput("f_pwr",
-            "Desired power",
-            min = 0.5,
-            max = 0.99,
-            value = .8, 
-            step = .01
-          )
+  tabPanel("t Test",
+    sidebarLayout(
+      sidebarPanel(
+        sliderInput("t_effect",
+          "Effect size on alternative",
+          min = 0,
+          max = 50,
+          value = 10, 
+          step = .01
         ),
-        mainPanel(
-          verbatimTextOutput("f")
+        sliderInput("t_sd",
+          "Standard deviation of sample",
+          min = 0.1,
+          max = 100,
+          value = 20, 
+          step = .01
+        ),
+        sliderInput("t_alpha",
+          "Desired Type I Error alpha",
+          min = .005,
+          max = .2,
+          value = .05, 
+          step = .005
+        ),
+        sliderInput("t_pwr",
+         "Desired power",
+         min = 0.5,
+         max = .99,
+         value = .8, 
+         step = .01
+        ),
+        sliderInput("t_r",
+         "Desired Allocation",
+         min = 0.1,
+         max = 10,
+         value = 1, 
+         step = .1
         )
+      ),
+      mainPanel(
+        verbatimTextOutput("ttest")
       )
-    ),
-    tabPanel("Chi-square Test",
-     sidebarLayout(
-       sidebarPanel(
-         sliderInput("chisq_m_n.groups", 
-            "Number of groups",
-            min = 3,
-            max = 10,
-            value = 3,
-            step = 1
-         ),
-         uiOutput(
-           "chisq_m_p_A"
-         ),
-         sliderInput("chisq_m_alpha",
+    )
+  ),
+  tabPanel("ANCOVA",
+    sidebarLayout(
+      sidebarPanel(
+        sliderInput("ancova_effect",
+          "Effect size on alternative",
+          min = 0,
+          max = 50, 
+          value = 10, 
+          step = .01
+        ),
+        sliderInput("ancova_corr",
+          "Correlation to covariate C",
+           min = 0,
+           max = 1,
+           value = .3, 
+           step = .01
+        ),
+        sliderInput("ancova_sd",
+          "Standard deviation of sample",
+          min = .01,
+          max = 100,
+          value = 20, 
+          step = .01
+        ),
+        sliderInput("ancova_alpha",
            "Desired Type I Error alpha",
            min = .005,
            max = .2,
            value = .05, 
            step = .005
-         ),
-         sliderInput("chisq_m_pwr",
-           "Desired power",
-           min = 0.5,
-           max = 0.99,
-           value = .8, 
-           step = .01
-         )
-       ),
-       mainPanel(
-         verbatimTextOutput("chisq_mult_groups")
-       )
-     )
-    )
-  ),
-  tabPanel("About",
-    fluidRow(
-      column(6,
-        includeMarkdown("README.md")
+        ),
+        sliderInput("ancova_pwr",
+          "Desired power",
+          min = 0.5,
+          max = .99,
+          value = .8, 
+          step = .01
+        ),
+        sliderInput("ancova_r",
+          "Desired Allocation",
+          min = 0.1,
+          max = 10,
+          value = 1, 
+          step = .1
+        ),
+        checkboxInput("ancova_gs",
+          "Guenther/Schouten correction",
+          value = TRUE
+        )
+      ),
+      mainPanel(
+        verbatimTextOutput("ancova")
       )
     )
+  ),
+  tabPanel("Chi-square Test",
+    sidebarLayout(
+      sidebarPanel(
+        sliderInput("chisq_p_Y",
+          "Event rate of group Y on alternative",
+          min = 0,
+          max = 1,
+          value = .5, 
+          step = .01
+        ),
+        sliderInput("chisq_p_X",
+          "Event rate of group X on alternative",
+          min = 0,
+          max = 1,
+          value = .3, 
+          step = .01
+        ),
+        sliderInput("chisq_alpha",
+          "Desired Type I Error alpha",
+          min = .005,
+          max = .2,
+          value = .05, 
+          step = .005
+        ),
+        sliderInput("chisq_pwr",
+          "Desired power",
+          min = 0.5,
+          max = .99,
+          value = .8, 
+          step = .01
+        ),
+        sliderInput("chisq_r",
+          "Desired Allocation",
+          min = 0.1,
+          max = 10,
+          value = 1, 
+          step = .1
+        ),
+        checkboxInput("chisq_power.exact",
+          "Berechnung zur exakten Power",
+          value = TRUE
+        )
+      ),
+      mainPanel(
+        verbatimTextOutput("chisq")
+      )
+    )
+  ),
+  tabPanel("f Test",
+    sidebarLayout(
+      sidebarPanel(
+        sliderInput("f_n.groups", 
+          "Number of groups",
+          min = 3,
+          max = 10,
+          value = 3,
+          step = 1
+        ),
+        uiOutput(
+          "f_mu_A"
+        ),
+        sliderInput("f_sd",
+                    "Standard deviation of sample",
+                    min = 0.1,
+                    max = 100,
+                    value = 20, 
+                    step = .01
+        ),
+        sliderInput("f_alpha",
+          "Desired Type I Error alpha",
+          min = .005,
+          max = .2,
+          value = .05, 
+          step = .005
+        ),
+        sliderInput("f_pwr",
+          "Desired power",
+          min = 0.5,
+          max = 0.99,
+          value = .8, 
+          step = .01
+        )
+      ),
+      mainPanel(
+        verbatimTextOutput("f")
+      )
+    )
+  ),
+  tabPanel("Chi-square Test",
+   sidebarLayout(
+     sidebarPanel(
+       sliderInput("chisq_m_n.groups", 
+          "Number of groups",
+          min = 3,
+          max = 10,
+          value = 3,
+          step = 1
+       ),
+       uiOutput(
+         "chisq_m_p_A"
+       ),
+       sliderInput("chisq_m_alpha",
+         "Desired Type I Error alpha",
+         min = .005,
+         max = .2,
+         value = .05, 
+         step = .005
+       ),
+       sliderInput("chisq_m_pwr",
+         "Desired power",
+         min = 0.5,
+         max = 0.99,
+         value = .8, 
+         step = .01
+       )
+     ),
+     mainPanel(
+       verbatimTextOutput("chisq_mult_groups")
+     )
+   )
   )
 )
 
@@ -297,25 +286,75 @@ ui <- navbarPage("samplesizr!",
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   
-  output$ztest <- renderPrint({
-    
-    effect <- input$z_effect
+  
+  
+# Z-Test =======================================================================
+  z_input <- reactive({
+    effect <- input$z_mean_y - input$z_mean_x
     alpha  <- input$z_alpha
     power  <- input$z_pwr
-    sd     <- input$z_sd
+    sd     <- input$z_sd_y_and_x
     r      <- input$z_r
     
-    z_out    <- samplesizr::n_ztest(
-      effect = effect,
-      sd     = sd,
-      alpha  = alpha, 
-      power  = power, 
-      r      = r
+    std_effect <- effect/sd
+    if (abs(std_effect) < .05) {
+      showModal(modalDialog(
+        title = "Important message",
+        "This is an important message!"
+      ))
+    }
+    
+    return(list(r = r, alpha = alpha, power = power, sd = sd, 
+                mu_x = input$z_mean_x, mu_y = input$z_mean_y
+              )
     )
+  })
+  
+  z_input_lazy <- reactive({
+    input$z_button
+    isolate(z_input())
+  })
+  
+  output$ztest <- renderPrint({
+    
+    input$z_button
+    tmp <- isolate(z_input())
+    
+    z_out    <- samplesizr::n_ztest(
+      effect = abs(tmp$mu_y - tmp$mu_x),
+      sd     = tmp$sd,
+      alpha  = tmp$alpha, 
+      power  = tmp$power, 
+      r      = tmp$r
+    )
+    
     print(z_out)
     
   })
   
+  output$z_assumptions_plot <- renderPlot({
+    
+    tmp <- z_input_lazy()
+    
+    min_v <- floor(min(tmp$mu_x, tmp$mu_y) - 4*tmp$sd)
+    max_v <- ceiling(max(tmp$mu_x, tmp$mu_y) + 4*tmp$sd)
+    
+    data_frame(
+      x = rep(seq(min_v, max_v, length.out = 101), 2),
+      group = c(rep("Control", 101), rep("Intervention", 101)),
+      mean = c(rep(tmp$mu_x, 101), rep(tmp$mu_y, 101)),
+      sd = tmp$sd
+    ) %>%
+    mutate(
+      PDF = dnorm(x, mean, sd)
+    ) %>%
+      ggplot(aes(x, PDF, color = group)) + geom_line()
+    
+  })
+  
+  
+  
+# t-Test =======================================================================
   output$ttest <- renderPrint({
     
     effect <- input$t_effect
