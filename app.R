@@ -29,7 +29,7 @@ ui <- navbarPage("samplesizr",
                      value = 70, step = 0.025)
         ),
         p("NOTE: Specify the minimal clinical significance to make you call
-          the intervention better regarding the primary endpoint."),
+          the intervention superior to control regarding the primary endpoint."),
         tags$div(title = "Equal for both groups",
           numericInput("z_sd_y_and_x", 
             label = h5("Standard deviation in both groups"), 
@@ -46,21 +46,22 @@ ui <- navbarPage("samplesizr",
         tags$hr(),
         h4("Other"),
         tags$div(title = "Ratio of group sizes (larger group) : (smaller group)",
-          sliderInput("z_r", "Desired allocation r",
+          sliderInput("z_r", "Desired ratio",
             min = 1, max = 10, value = 1, step = 1
           )
         ),
-        tags$div(title = "Group which has more patients",
-          radioButtons("z_r_x_or_y", "Direction of allocation",  
-            choiceNames = c("Intervention", "Control"), choiceValues = c(1,2)
-          )
+        radioButtons("z_r_x_or_y", "Larger group",  
+          choiceNames = c("Intervention", "Control"), choiceValues = c(1,2)
         )
       ),
       mainPanel(
         tags$div(title = "[1] M. K., Fallzahlberechnung in der medizinischen 
           Forschung (2018), 1th Edition, Springer",
-          p("The methods used for calculation are explained on the pages
-            13 - 16 in [1]."
+          p("Note that the sample size for a one-sided level
+            &alpha; / 2 z-test is identical to the sample size for a two-sided 
+            level &alpha; test.
+            The methods used for calculation the sample size are explained
+            on the pages 13 - 16 in [1]."
           )
         ),
         tags$hr(),
@@ -68,31 +69,46 @@ ui <- navbarPage("samplesizr",
           intervention group have the same mean in the primary endpoint."),
         p("The alternative hypothesis: There is a 
           difference between the two groups in the primary endpoint."),
-        p("Please specify the difference you
-          think to observe in your data assumptions."),
+        p("Please specify the difference of minimal clinical relevance you
+          need to call the new intervention superior in your data assumptions."),
         h4("Data assumptions"),
         plotOutput("z_assumptions_plot"),
-        p("Plot 1. The densities for the
-          distribution assumptions of the Input data are shown."
+        p("Plot 1. Normal distribution assumption. 
+          The model-distribution on your assumptions for control and intervention 
+          group are shown."
         ),
         tags$hr(),
-        h3("Results"),
-        verbatimTextOutput("ztest"),
-        tags$br(),
-        h4("Test statistic"),
-        plotOutput("z_density_plot"),
-        p("Plot 2. The density function of the Z statistic is shown. 
-          The vertical line marks the border between a decision for the 
-          hypothesis/alternative."
+        conditionalPanel(
+          "input.z_button && 
+          (Math.abs(input.z_mean_y - input.z_mean_x) / input.z_sd_y_and_x ) >= .05",
+          h3("Results"),
+          verbatimTextOutput("ztest"),
+          tags$br(),
+          h4("Test statistic"),
+          plotOutput("z_density_plot"),
+          p("Plot 2. The distribution of the Z statistic under hypothesis
+            and one side of the alternative is shown. 
+            The vertical line marks the border between a decision for the 
+            hypothesis/alternative."
+          ),
+          tags$br(),
+          h4("Power curve"),
+          plotOutput("z_effect_plot"),
+          p("Plot 3. The dependency effect - power for fixed sample size
+            is shown. To see the sample size look in the results.
+            Effect is defined as the specified mean difference between
+            the two groups.
+            The lines mark the border where the desired power is reached."
+          )
         ),
-        tags$br(),
-        h4("Power curve"),
-        plotOutput("z_effect_plot"),
-        p("Plot 3. The dependency on the mean difference is shown.
-          Note that the sample size is fixed. To see the sample size
-          look in the results. The lines mark the effect size where 
-          the desired power is reached."
-        )
+        conditionalPanel(
+         "input.z_button &&
+         ( Math.abs(input.z_mean_y - input.z_mean_x) / input.z_sd_y_and_x ) < .05",
+         h3("Problem!"),
+         p("The effect on the intervention you have specified is 0 or really small. 
+           Please check your input. You want to perform sample size calculation 
+           for small effects? Use the R package samplesizr or comparable software instead.")
+         )
       )
     )
   ),
@@ -331,25 +347,15 @@ server <- function(input, output) {
     r      <- input$z_r
     r_inv  <- input$z_r_x_or_y
     
-    effect_sd <- effect/sd
-    
     if (r_inv == 2) { r <- (1/r) }
     
-    if (abs(effect_sd) < .05) {
-      showModal(modalDialog(
-        title = "Problem",
-        "Please specify a larger group difference!"
-      ))
-    } else {
-      return(list(r = r, alpha = alpha, power = power, sd = sd, 
+    return(list(r = r, alpha = alpha, power = power, sd = sd, 
         mu_x = input$z_mean_x, mu_y = input$z_mean_y
-      ))
-    }
+    ))
   })
   
   z_input_lazy <- reactive({
     input$z_button
-    
     isolate(z_input())
   })
   
@@ -358,7 +364,7 @@ server <- function(input, output) {
     input$z_button
     
     z_in  <- z_input_lazy()
-    
+ 
     z_out <- n_ztest(
       effect = z_in$mu_y - z_in$mu_x,
       sd     = z_in$sd,
@@ -387,7 +393,13 @@ server <- function(input, output) {
     mutate(
       PDF = dnorm(x, mean, sd)
     ) %>%
-      ggplot(aes(x, PDF, color = group)) + geom_line() + theme_classic()
+      ggplot(aes(x, PDF, color = group)) + 
+      geom_line() + 
+      theme_classic(base_size = 18) + 
+      theme(legend.position = "top") +
+      scale_x_continuous(name = "primary endpoint") +
+      scale_y_continuous(name = "") + 
+      scale_color_discrete(name = "")
     
   })
   
@@ -403,8 +415,8 @@ server <- function(input, output) {
     
     nc <-  sqrt( (r/(1+r)) * n_X ) * (effect / sd)
     z_beta  <- qnorm(power)
-    if (effect < 0) { x_vline <- nc + z_beta }
-    if (effect > 0) { x_vline <- nc - z_beta }
+    x_vline <- nc + z_beta
+    x_vline <- nc - z_beta
     min_x <- floor( min(0, nc) - 4 )
     max_x <- ceiling( max(0, nc) + 4 )
     
@@ -420,8 +432,12 @@ server <- function(input, output) {
       ggplot(aes(z, PDF, color = group)) +
       geom_line()  +
       geom_vline(xintercept = x_vline, lty = 3) +
-      theme_classic() +
-      scale_color_discrete(name="Test statistic Z")
+      geom_vline(xintercept = - x_vline, lty = 3) +
+      theme_classic(base_size = 18) +
+      scale_color_discrete(name="") +
+      theme(legend.position = "top") +
+      scale_x_continuous(name = "Z") +
+      scale_y_continuous(name = "")
   })
   
   output$z_effect_plot <- renderPlot({
@@ -449,7 +465,7 @@ server <- function(input, output) {
       y = f(x)
     ) %>%
     ggplot(aes(x, y)) + geom_line() + 
-      theme_classic() +
+      theme_classic(base_size = 18) +
       geom_hline(yintercept = power, lty = 2) +
       geom_vline(xintercept = vert_line, lty = 3) +
       scale_y_continuous(

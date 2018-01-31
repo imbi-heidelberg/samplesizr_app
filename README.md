@@ -10,11 +10,17 @@ On the panel above you can choose the statistical test you want to
 perform. Choose the input parameters and press 'Calculate!' to perform the
 sample size calculation.
 
-This app cannot replace the judgement and expertise of an biometrician 
-performing a sample size calculation. It should give an orientation and a 
-'feeling' for the power of the certain tests.
+For an introduction in sample size calcuation for clinical trials and
+to understand the theory behind this application the following book is recommended.
+This application developed on basis of the calculations for this book.
 
-The theory behind that and much more is explained in [1].
+> [1] M.Kieser: Fallzahlberechnung in der medizinischen Forschung [2018], 1th Edition,
+Springer Verlag.
+
+This app cannot replace the judgement and expertise of an biometrician 
+performing a sample size calculation cosidering the specific details of your study.
+It should give an orientation and a 'feeling' for the power of the certain tests.
+
 
 ### Example
 
@@ -27,22 +33,18 @@ For the decision for the new intervention, given the intervention is really
 'better' you want to have a minimal probability of 0.9 (power).
 You want a maximal type I error of 0.05 (two-sided) / 0.025 (one-sided).
 You know that the standard deviation will be 20 points.
-Click on the tab 'z-test' above to look up the results!
+Choose the tab 'z-test' above and click 'Calculate' to look up the results!
 
 ### About samplesizr
 
-Samplesizr is the shiny web application based on the R package 
+Samplesizr is the web application based on the R package 
 <a href="https://github.com/goseberg/samplesizr">
 samplesizr.
 </a> 
 
-This R package performs sample size calculations based on:
-
-> [1] M. Kieser, Fallzahlberechnung in der medizinischen Forschung (2018), 1th Edition, Springer
-
 The samplesizr is still under development. 
-Now only the z test is implemented with full functionality but soon the other
-tests will follow.
+Now only the z test is implemented in the web app with full functionality 
+but soon the other tests will follow.
 
 A special thanks to KK for his supervision, patience and help whilst 
 teaching me the tools which made our work on this project very efficient and productive.
@@ -59,4 +61,4 @@ A click on the logo will lead you to the Webpage of our Institute.
 
 Daniel Goseberg,  
 IMBI Heidelberg,  
-January 27th in Heidelberg
+January 31th in Heidelberg
