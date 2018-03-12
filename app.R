@@ -10,35 +10,35 @@ library(tidyverse)
 max_sliders <- 10
 
 ui <- navbarPage("samplesizr",
-  tabPanel("Overview",
+  tabPanel("Overview",#=========================================================
     includeMarkdown("README.md")
   ),
-  tabPanel("z-Test",#===========================================================
-    h2("Sample size calculation for the two-sided z-test"),
+  tabPanel("z test",#===========================================================
+    h2("Sample size calculation for the two-sided z test"),
     sidebarLayout(
       sidebarPanel(
         actionButton("z_button", "Calculate!", width = '100%'),
         tags$hr(),
         h4("Data assumptions"),
         tags$div(title = "Value of primary endpoint (control group)",
-          numericInput("z_mean_x", label = h5("Mean of control group"), 
+          numericInput("z_mean_x", label = "Mean of control group", 
                        value = 60, step = 0.025)
         ),
         tags$div(title = "Value of primary endpoint (intervention group). See NOTE.",
-          numericInput("z_mean_y", label = h5("Mean of intervention group"), 
+          numericInput("z_mean_y", label = "Mean of intervention group", 
                      value = 70, step = 0.025)
         ),
         p("NOTE: Specify the minimal clinical significance to make you call
           the intervention superior to control regarding the primary endpoint."),
         tags$div(title = "Equal for both groups",
           numericInput("z_sd_y_and_x", 
-            label = h5("Standard deviation in both groups"), 
+            label = "Standard deviation in both groups", 
             value = 20, step = 0.025)
         ),
         tags$hr(),
         h4("Type I/II Error characteristics"),
-        sliderInput("z_alpha", "Maximal type I error rate",
-          min = .005, max = .2, value = .05, step = .005
+        sliderInput("z_alpha", "Maximal type I error rate (two-sided)",
+          min = .005, max = .2, value = .05, step = .001
         ),
         sliderInput("z_pwr", "Desired power",
           min = 0.5, max = .99, value = .9, step = .01
@@ -55,100 +55,49 @@ ui <- navbarPage("samplesizr",
         )
       ),
       mainPanel(
-        tags$div(title = "[1] M. K., Fallzahlberechnung in der medizinischen 
-          Forschung (2018), 1th Edition, Springer",
-          p("Note that the sample size for a one-sided level
-            &alpha; / 2 z-test is identical to the sample size for a two-sided 
-            level &alpha; test.
-            The methods used for calculation the sample size are explained
-            on the pages 13 - 16 in [1]."
-          )
-        ),
-        tags$hr(),
-        p("The null hypothesis: control and 
-          intervention group have the same mean in the primary endpoint."),
-        p("The alternative hypothesis: There is a 
-          difference between the two groups in the primary endpoint."),
-        p("Please specify the difference of minimal clinical relevance you
-          need to call the new intervention superior in your data assumptions."),
-        h4("Data assumptions"),
-        plotOutput("z_assumptions_plot"),
-        p("Plot 1. Normal distribution assumption. 
-          The model-distribution on your assumptions for control and intervention 
-          group are shown."
-        ),
-        tags$hr(),
-        conditionalPanel(
-          "input.z_button && 
-          (Math.abs(input.z_mean_y - input.z_mean_x) / input.z_sd_y_and_x ) >= .05",
-          h3("Results"),
-          verbatimTextOutput("ztest"),
-          tags$br(),
-          h4("Test statistic"),
-          plotOutput("z_density_plot"),
-          p("Plot 2. The distribution of the Z statistic under hypothesis
-            and one side of the alternative is shown. 
-            The vertical line marks the border between a decision for the 
-            hypothesis/alternative."
-          ),
-          tags$br(),
-          h4("Power curve"),
-          plotOutput("z_effect_plot"),
-          p("Plot 3. The dependency effect - power for fixed sample size
-            is shown. To see the sample size look in the results.
-            Effect is defined as the specified mean difference between
-            the two groups.
-            The lines mark the border where the desired power is reached."
-          )
-        ),
-        conditionalPanel(
-         "input.z_button &&
-         ( Math.abs(input.z_mean_y - input.z_mean_x) / input.z_sd_y_and_x ) < .05",
-         h3("Problem!"),
-         p("The effect on the intervention you have specified is 0 or really small. 
-           Please check your input. You want to perform sample size calculation 
-           for small effects? Use the R package samplesizr or comparable software instead.")
-         )
+        verbatimTextOutput("ztest")
       )
     )
   ),
-  tabPanel("t Test",#===========================================================
+  tabPanel("t test",#===========================================================
+    h2("Sample size calculation for the two-sided t-test"),
     sidebarLayout(
-      sidebarPanel(
-        sliderInput("t_effect",
-          "Effect size on alternative",
-          min = 0,
-          max = 50,
-          value = 10, 
-          step = .01
+     sidebarPanel(
+        actionButton("t_button", "Calculate!", width = '100%'),
+        tags$hr(),
+        h4("Planning assumptions"),
+        tags$div(title = "Value of primary endpoint (control group)",
+          numericInput("t_mean_x", label = "Mean of control group", 
+            value = 60, step = 0.025)
         ),
-        sliderInput("t_sd",
-          "Standard deviation of sample",
-          min = 0.1,
-          max = 100,
-          value = 20, 
-          step = .01
+        tags$div(title = "Value of primary endpoint (intervention group). See NOTE.",
+          numericInput("t_mean_y", label = "Mean of intervention group", 
+            value = 70, step = 0.025)
         ),
-        sliderInput("t_alpha",
-          "Desired Type I Error alpha",
-          min = .005,
-          max = .2,
-          value = .05, 
-          step = .005
+        p("NOTE: Specify the difference such that the intervention
+          is clinically relevant superior to control regarding the primary endpoint."),
+        tags$div(title = "Equal for both groups",
+          numericInput("t_sd_y_and_x", 
+            label = "Standard deviation (same in both groups)", 
+            value = 20, step = 0.025)
         ),
-        sliderInput("t_pwr",
-         "Desired power",
-         min = 0.5,
-         max = .99,
-         value = .8, 
-         step = .01
+        tags$hr(),
+        h4("Type I/II error characteristics"),
+        sliderInput("t_alpha", "Maximal type I error rate (two-sided)",
+                    min = .005, max = .2, value = .05, step = .001
         ),
-        sliderInput("t_r",
-         "Desired Allocation",
-         min = 0.1,
-         max = 10,
-         value = 1, 
-         step = .1
+        sliderInput("t_pwr", "Desired power",
+                    min = 0.5, max = .99, value = .9, step = .01
+        ),
+        tags$hr(),
+        h4("Other specifications"),
+        tags$div(title = "Ratio of group sizes (larger group) : (smaller group)",
+          sliderInput("t_r", "Desired Ratio",
+            min = 1, max = 10, value = 1, step = 1
+          )
+        ),
+        radioButtons("t_r_x_or_y", "Larger group",  
+          choiceNames = c("Intervention", "Control"), choiceValues = c(1,2)
         )
       ),
       mainPanel(
@@ -157,49 +106,50 @@ ui <- navbarPage("samplesizr",
     )
   ),
   tabPanel("ANCOVA",#===========================================================
+    h2("Sample size calculation for the Analysis of Covariance (ANCOVA)"),
     sidebarLayout(
       sidebarPanel(
-        sliderInput("ancova_effect",
-          "Effect size on alternative",
-          min = 0,
-          max = 50, 
-          value = 10, 
-          step = .01
+        actionButton("ancova_button", "Calculate!", width = '100%'),
+        tags$hr(),
+        h4("Planning assumptions"),
+        tags$div(title = "Value of primary endpoint (control group)",
+                 numericInput("ancova_mean_x", label = "Mean of control group", 
+                              value = 60, step = 0.025)
         ),
-        sliderInput("ancova_corr",
-          "Correlation to covariate C",
-           min = 0,
-           max = 1,
-           value = .3, 
-           step = .01
+        tags$div(title = "Value of primary endpoint (intervention group). See NOTE.",
+                 numericInput("ancova_mean_y", label = "Mean of intervention group", 
+                              value = 70, step = 0.025)
         ),
-        sliderInput("ancova_sd",
-          "Standard deviation of sample",
-          min = .01,
-          max = 100,
-          value = 20, 
-          step = .01
+        p("NOTE: Specify the difference such that the intervention
+          is clinically relevant superior to control regarding the primary endpoint."),
+        numericInput("ancova_corr",
+          label = "Correlation to covariate C",
+          value = .5,
+          step  = 0.005
         ),
-        sliderInput("ancova_alpha",
-           "Desired Type I Error alpha",
-           min = .005,
-           max = .2,
-           value = .05, 
-           step = .005
+        tags$div(title = "Equal for both groups",
+          numericInput("ancova_sd_y_and_x", 
+            label = "Standard deviation (same in both groups)", 
+            value = 20, step = 0.025
+          )
         ),
-        sliderInput("ancova_pwr",
-          "Desired power",
-          min = 0.5,
-          max = .99,
-          value = .8, 
-          step = .01
+        tags$hr(),
+        h4("Type I/II error characteristics"),
+        sliderInput("ancova_alpha", "Maximal type I error rate (two-sided)",
+          min = .005, max = .2, value = .05, step = .001
         ),
-        sliderInput("ancova_r",
-          "Desired Allocation",
-          min = 0.1,
-          max = 10,
-          value = 1, 
-          step = .1
+        sliderInput("ancova_pwr", "Desired power",
+          min = 0.5, max = .99, value = .9, step = .01
+        ),
+        tags$hr(),
+        h4("Other specifications"),
+        tags$div(title = "Ratio of group sizes (larger group) : (smaller group)",
+          sliderInput("ancova_r", "Desired Ratio",
+            min = 1, max = 10, value = 1, step = 1
+          )
+        ),
+        radioButtons("ancova_r_x_or_y", "Larger group",  
+          choiceNames = c("Intervention", "Control"), choiceValues = c(1,2)
         ),
         checkboxInput("ancova_gs",
           "Guenther/Schouten correction",
@@ -211,29 +161,34 @@ ui <- navbarPage("samplesizr",
       )
     )
   ),
-  tabPanel("Chi-square Test",#==================================================
+  tabPanel("Chi-square test",#==================================================
+    h2("Sample size calculation for the Chi-Square test"),
     sidebarLayout(
       sidebarPanel(
-        sliderInput("chisq_p_Y",
-          "Event rate of group Y on alternative",
-          min = 0,
-          max = 1,
+        actionButton("chisq_button", "Calculate!", width = '100%'),
+        tags$hr(),
+        h4("Planning assumptions"),
+        numericInput("chisq_p_Y",
+          label = "Event rate: intervention group",
           value = .5, 
-          step = .01
+          step = .001
         ),
-        sliderInput("chisq_p_X",
-          "Event rate of group X on alternative",
-          min = 0,
-          max = 1,
+        numericInput("chisq_p_X",
+          label = "Event rate: control group",
           value = .3, 
-          step = .01
+          step = .001
         ),
+        p("NOTE: Specify the minimal absolute rate difference such that the 
+          intervention is clinically relevant superior to control regarding
+          the primary endpoint."),
+        tags$hr(),
+        h4("Type I/II error characteristics"),
         sliderInput("chisq_alpha",
-          "Desired Type I Error alpha",
+          "Maximal Type I error rate",
           min = .005,
           max = .2,
           value = .05, 
-          step = .005
+          step = .001
         ),
         sliderInput("chisq_pwr",
           "Desired power",
@@ -242,12 +197,15 @@ ui <- navbarPage("samplesizr",
           value = .8, 
           step = .01
         ),
-        sliderInput("chisq_r",
-          "Desired Allocation",
-          min = 0.1,
-          max = 10,
-          value = 1, 
-          step = .1
+        tags$hr(),
+        h4("Other specifications"),
+        tags$div(title = "Ratio of group sizes (larger group) : (smaller group)",
+          sliderInput("chisq_r", "Desired Ratio",
+            min = 1, max = 10, value = 1, step = 1
+          )
+        ),
+        radioButtons("chisq_r_x_or_y", "Larger group",  
+          choiceNames = c("Intervention", "Control"), choiceValues = c(1,2)
         ),
         checkboxInput("chisq_power.exact",
           "Berechnung zur exakten Power",
@@ -259,9 +217,76 @@ ui <- navbarPage("samplesizr",
       )
     )
   ),
-  tabPanel("f Test",
+  tabPanel("Fisher-Boschloo test",#=============================================
+    h2("Sample size calculation for the Fisher-Boschloo test"),
     sidebarLayout(
       sidebarPanel(
+        actionButton("fb_button", "Calculate!", width = '100%'),
+        tags$hr(),
+        h4("Planning assumptions"),
+        numericInput("fb_p_Y",
+          label = "Event rate: intervention group",
+          value = .5, 
+          step = .001
+        ),
+        numericInput("fb_p_X",
+          label = "Event rate: control group",
+          value = .3, 
+          step = .001
+        ),
+        tags$hr(),
+        h4("Type I/II error characteristics"),
+        sliderInput("fb_alpha",
+          "Maximal Type I error rate",
+          min = .005,
+          max = .2,
+          value = .025, 
+          step = .001
+        ),
+        sliderInput("fb_pwr",
+          "Desired power",
+          min = 0.5,
+          max = .99,
+          value = .8, 
+          step = .01
+        ),
+        tags$hr(),
+        h4("Other specifications"),
+        tags$div(title = "Ratio of group sizes (larger group) : (smaller group)",
+          sliderInput("fb_r", "Desired ratio",
+            min = 1, max = 10, value = 1, step = 1
+          )
+        ),
+        radioButtons("fb_r_x_or_y", "Larger group",  
+          choiceNames = c("Intervention", "Control"), choiceValues = c(1,2)
+        ),
+        radioButtons("fb_calc_speed", "Level of accuracy",
+                     choices = c("1" = .05,"2" = .01,"3" = .001),
+                     selected = .001,
+                     inline = TRUE
+        ),
+        p("Note: This defines the step width the algorithm is working with.
+          Level 1 uses high step width for a fast calculation.
+          Level 3 uses low step width but will need a long time to calculate.
+          WARNING. Using Level 1 might not deliver an accurate result."),
+        checkboxInput("fb_exact",
+                      "Exakte Berechnung",
+                      value = TRUE
+        )
+      ),
+      mainPanel(
+        verbatimTextOutput("fisher_boschloo")
+      )
+    )
+  ),
+ 
+  tabPanel("F test",#===========================================================
+    h2("Sample size calculation for the F-Test"),
+    h4("comparing k > 2 groups"),
+    sidebarLayout(
+     sidebarPanel(
+        actionButton("f_button", "Calculate!", width = '100%'),
+        tags$hr(),
         sliderInput("f_n.groups", 
           "Number of groups",
           min = 3,
@@ -269,22 +294,24 @@ ui <- navbarPage("samplesizr",
           value = 3,
           step = 1
         ),
+        tags$hr(),
+        h4("Planning assumptions"),
         uiOutput(
           "f_mu_A"
         ),
-        sliderInput("f_sd",
-                    "Standard deviation of sample",
-                    min = 0.1,
-                    max = 100,
-                    value = 20, 
-                    step = .01
+        numericInput("f_sd",
+          label = "Standard deviation (same in all groups)",
+          value = 20, 
+          step = .01
         ),
+        tags$hr(),
+        h4("Type I/II error characteristics"),
         sliderInput("f_alpha",
-          "Desired Type I Error alpha",
+          "Maximal Type I error rate",
           min = .005,
           max = .2,
           value = .05, 
-          step = .005
+          step = .001
         ),
         sliderInput("f_pwr",
           "Desired power",
@@ -299,9 +326,13 @@ ui <- navbarPage("samplesizr",
       )
     )
   ),
-  tabPanel("Chi-square Test",#==================================================
-   sidebarLayout(
+  tabPanel("Chi-square test",#==================================================
+    h2("Sample size calculation for the Chi-square test"),
+    h4("comparing k > 2 groups"),
+    sidebarLayout(
      sidebarPanel(
+       actionButton("chisq_m_button", "Calculate!", width = '100%'),
+       tags$hr(),
        sliderInput("chisq_m_n.groups", 
           "Number of groups",
           min = 3,
@@ -309,15 +340,19 @@ ui <- navbarPage("samplesizr",
           value = 3,
           step = 1
        ),
+       tags$hr(),
+       h4("Planning assumptions"),
        uiOutput(
          "chisq_m_p_A"
        ),
+       tags$hr(),
+       h4("Type I/II error characteristics"),
        sliderInput("chisq_m_alpha",
-         "Desired Type I Error alpha",
+         "Maximal type I error rate",
          min = .005,
          max = .2,
          value = .05, 
-         step = .005
+         step = .001
        ),
        sliderInput("chisq_m_pwr",
          "Desired power",
@@ -331,15 +366,19 @@ ui <- navbarPage("samplesizr",
        verbatimTextOutput("chisq_mult_groups")
      )
    )
-  )
+  ),
+  inverse = TRUE,
+  footer = "[1] M. Kieser, Fallzahlberechnung in der medizinischen 
+     Forschung (2018), 1th Edition, Springer"
 )
 
 
-# Define server logic required to draw a histogram
+# Define server logic ==========================================================
 server <- function(input, output) {
   
 # Z-Test =======================================================================
-  z_input <- reactive({
+
+  z_input <- eventReactive(input$z_button,{
     effect <- input$z_mean_y - input$z_mean_x
     alpha  <- input$z_alpha
     power  <- input$z_pwr
@@ -421,9 +460,9 @@ server <- function(input, output) {
     max_x <- ceiling( max(0, nc) + 4 )
     
     data_frame(
-      z = rep(seq(min_x, max_x, length.out = 101), 2),
+      z     = rep(seq(min_x, max_x, length.out = 101), 2),
       group = c(rep("Hypothesis", 101), rep("Alternative", 101)),
-      mean = c(rep(0, 101), rep(nc, 101)),
+      mean  = c(rep(0, 101), rep(nc, 101)),
       sd = 1
     ) %>%
       mutate(
@@ -479,99 +518,220 @@ server <- function(input, output) {
     
   })
   
-  
-  
-  
 # t-Test =======================================================================
-  output$ttest <- renderPrint({
-    
-    effect <- input$t_effect
+  t_input <- eventReactive(input$t_button,{
+    effect <- input$t_mean_y - input$t_mean_x
     alpha  <- input$t_alpha
     power  <- input$t_pwr
-    sd     <- input$t_sd
+    sd     <- input$t_sd_y_and_x
     r      <- input$t_r
+    r_inv  <- input$t_r_x_or_y
     
-    t_out    <- samplesizr::n_ttest(
-      effect = effect,
-      sd     = sd,
-      alpha  = alpha, 
-      power  = power, 
-      r      = r
-    )
-    print(t_out)
+    if (r_inv == 2) { r <- (1/r) }
     
+    return(list(r = r, alpha = alpha, power = power, sd = sd, 
+                mu_x = input$t_mean_x, mu_y = input$t_mean_y
+    ))
   })
   
-  output$chisq <- renderPrint({
+  t_input_lazy <- reactive({
+    input$t_button
+    isolate(t_input())
+  })
+  
+  t_output <- reactive({
     
+    input$t_button
+    
+    t_in  <- t_input_lazy()
+    
+    t_out <- n_ttest(
+      effect = t_in$mu_y - t_in$mu_x,
+      sd     = t_in$sd,
+      alpha  = t_in$alpha, 
+      power  = t_in$power, 
+      r      = t_in$r
+    )
+    return(t_out)
+  })
+  
+  output$ttest <- renderPrint({ print(t_output()) })
+  
+# chisq test ===================================================================
+ 
+  chisq_input <- eventReactive(input$chisq_button,{
     p_Y    <- input$chisq_p_Y
     p_X    <- input$chisq_p_X
     alpha  <- input$chisq_alpha
     power  <- input$chisq_pwr
     r      <- input$chisq_r
     power.exact <- input$chisq_power.exact
+    r_inv  <- input$chisq_r_x_or_y
     
-    chisq_out  <- samplesizr::n_chisq(
-      p_Y    = p_Y,
-      p_X    = p_X,
-      alpha  = alpha, 
-      power  = power, 
-      r      = r,
-      power.exact = power.exact
-    )
-    print(chisq_out)
+    if (r_inv == 2) { r <- (1/r) }
     
+    return(list(r = r, alpha = alpha, power = power, 
+      p_Y = p_Y, p_X = p_X, power.exact = power.exact
+    ))
   })
+  
+  chisq_input_lazy <- reactive({
+    input$chisq_button
+    isolate(chisq_input())
+  })
+  
+  chisq_output <- reactive({
+    
+    input$chisq_button
+    
+    chisq_in  <- chisq_input_lazy()
+    
+    chisq_out  <- n_chisq(
+      p_Y    = chisq_in$p_Y,
+      p_X    = chisq_in$p_X,
+      alpha  = chisq_in$alpha, 
+      power  = chisq_in$power, 
+      r      = chisq_in$r,
+      power.exact = chisq_in$power.exact
+    )
+    return(chisq_out)
+  })
+  
+  output$chisq <- renderPrint({ print(chisq_output()) })
+  
+  
+# fisher boschloo test =========================================================
+
+  fb_input <- eventReactive(input$fb_button,{
+    p_Y   <- input$fb_p_Y
+    p_X   <- input$fb_p_X
+    alpha <- input$fb_alpha
+    power <- input$fb_pwr
+    r     <- input$fb_r
+    exact <- input$fb_exact
+    r_inv <- input$fb_r_x_or_y
+    SW    <- as.numeric(input$fb_calc_speed)
+    
+    if (r_inv == 2) { r <- (1/r) }
+    
+    return(list(r = r, alpha = alpha, power = power, p_Y = p_Y, 
+                p_X = p_X, exact = exact, SW = SW
+    ))
+  })
+  
+  fb_input_lazy <- reactive({
+    input$fb_button
+    isolate(fb_input())
+  })
+  
+  fb_output <- reactive({
+    
+    input$fb_button
+    
+    fb_in  <- fb_input_lazy()
+    
+    fb_out  <- n_fisher_boschloo(
+      p_Y    = fb_in$p_Y,
+      p_X    = fb_in$p_X,
+      alpha  = fb_in$alpha, 
+      power  = fb_in$power, 
+      r      = fb_in$r,
+      exact  = fb_in$exact,
+      SW     = fb_in$SW
+    )
+    return(fb_out)
+  })
+  
+  output$fisher_boschloo <- renderPrint({ print(fb_output()) })
+  
   
 # ANCOVA =======================================================================
   
-  output$ancova <- renderPrint({
-    
-    effect <- input$ancova_effect
-    corr   <- input$ancova_corr
-    sd     <- input$ancova_sd
+  ancova_input <- eventReactive(input$ancova_button,{
+    effect <- input$ancova_mean_y - input$ancova_mean_x
     alpha  <- input$ancova_alpha
     power  <- input$ancova_pwr
-    r      <- input$ancova_r
+    sd     <- input$ancova_sd_y_and_x
+    corr   <- input$ancova_corr
     gs     <- input$ancova_gs
+    r      <- input$ancova_r
+    r_inv  <- input$ancova_r_x_or_y
     
-    ancova_out  <- samplesizr::n_ancova(
-      effect = effect,
-      corr   = corr,
-      sd     = sd,
-      alpha  = alpha,
-      power  = power, 
-      r      = r,
-      gs     = gs
-    )
-    print(ancova_out)
+    if (r_inv == 2) { r <- (1/r) }
     
+    return(list(r = r, alpha = alpha, power = power, sd = sd, 
+                mu_x = input$ancova_mean_x, mu_y = input$ancova_mean_y,
+                corr = corr, gs = gs
+    ))
   })
+  
+  ancova_input_lazy <- reactive({
+    input$ancova_button
+    isolate(ancova_input())
+  })
+  
+  ancova_output <- reactive({
+    
+    input$ancova_button
+    
+    ancova_in  <- ancova_input_lazy()
+    
+    ancova_out <- n_ancova(
+      effect = ancova_in$mu_y - ancova_in$mu_x,
+      corr   = ancova_in$corr,
+      sd     = ancova_in$sd,
+      alpha  = ancova_in$alpha, 
+      power  = ancova_in$power, 
+      r      = ancova_in$r,
+      gs     = ancova_in$gs
+    )
+    return(ancova_out)
+  })
+  
+  output$ancova <- renderPrint({ print(ancova_output()) })
   
 # F TEST =======================================================================
   
-  output$f <- renderPrint({
-    mu_A <- c()
+  f_input <- eventReactive(input$f_button,{
     n.groups <- input$f_n.groups
     sd    <- input$f_sd
     alpha <- input$f_alpha
     power <- input$f_pwr
+    mu_A  <- c()
     
     for (i in 1:n.groups){
       mu_A[i] <- eval(parse(text = paste0("input$mu_",i)))
     }
-    
-    if (any(mu_A != 0)){
-      f_out <-  n_ftest(
-        mu_A     = mu_A,
-        sd       = sd, 
-        n.groups = n.groups,
-        alpha    = alpha,
-        power    = power
-      )
-      print(f_out)
-    } 
+   
+    return(list(mu_A = mu_A, n.groups = n.groups,
+                alpha = alpha, power = power, sd = sd))
   })
+  
+  f_input_lazy <- reactive({
+    input$f_button
+    isolate(f_input())
+  })
+  
+  f_output <- reactive({
+    
+    input$f_button
+    
+    f_in  <- f_input_lazy()
+
+    
+    if (any(f_in$mu_A != 0)){
+      f_out <- n_ftest(
+        mu_A = f_in$mu_A,
+        sd   = f_in$sd,
+        n.groups = f_in$n.groups,
+        alpha = f_in$alpha, 
+        power = f_in$power
+      )
+    }
+    return(f_out)
+  })
+  
+  output$f <- renderPrint({ print(f_output()) })
 
   output$f_mu_A <- renderUI({
     f_mu_A_input_list <- lapply(1:input$f_n.groups, function(i) {
@@ -587,13 +747,11 @@ server <- function(input, output) {
       mu_number_name <- paste("mu_", my_i, sep="")
       
       output[[mu_number_name]] <- renderUI({
-        sliderInput(
+        numericInput(
           mu_number_name,
-          paste0("Erwarteter Wert Gruppe ", my_i),
-          min = -100,
-          max = 100,
+          label = paste0("Mean: group ", my_i),
           value = 0,
-          step = 1
+          step = .001
         )
       })
     })
@@ -601,26 +759,45 @@ server <- function(input, output) {
   
 # Chisquare mult. groups =======================================================
   
-  output$chisq_mult_groups <- renderPrint({
-    p_A <- c()
+  chisq_m_input <- eventReactive(input$chisq_m_button,{
     n.groups <- input$chisq_m_n.groups
     alpha <- input$chisq_m_alpha
     power <- input$chisq_m_pwr
+    p_A  <- c()
     
     for (i in 1:n.groups){
       p_A[i] <- eval(parse(text = paste0("input$p_",i)))
     }
     
-    if (any(p_A != .5)){ 
-      chisq_m_out <- n_chisq_mult_groups(
-        p_A      = p_A,
-        n.groups = n.groups,
-        alpha    = alpha,
-        power    = power
-      )
-      print(chisq_m_out)
-    }
+    return(list(p_A = p_A, n.groups = n.groups,
+                alpha = alpha, power = power)
+           )
   })
+  
+  chisq_m_input_lazy <- reactive({
+    input$chisq_m_button
+    isolate(chisq_m_input())
+  })
+  
+  chisq_m_output <- reactive({
+    
+    input$chisq_m_button
+    
+    chisq_m_in  <- chisq_m_input_lazy()
+    
+    
+    if (any(chisq_m_in$p_A != .5)){
+      chisq_m_out <- n_chisq_mult_groups(
+        p_A = chisq_m_in$p_A,
+        n.groups = chisq_m_in$n.groups,
+        alpha = chisq_m_in$alpha, 
+        power = chisq_m_in$power
+      )
+    }
+    return(chisq_m_out)
+  })
+  
+  output$chisq_mult_groups <- renderPrint({ print(chisq_m_output()) })
   
   output$chisq_m_p_A <- renderUI({
     chisq_m_p_A_input_list <- lapply(1:input$chisq_m_n.groups, function(i) {
@@ -639,7 +816,7 @@ server <- function(input, output) {
       output[[p_number_name]] <- renderUI({
         sliderInput(
           p_number_name,
-          paste0("Erwartete Rate Gruppe ", my_i),
+          paste0("Rate: group ", my_i),
           min = 0,
           max = 1,
           value = .5,
