@@ -40,7 +40,7 @@ samplesizr.
 </a> 
 Special thanks to Kevin Kunzmann for his supervision, patience and help whilst 
 teaching me the tools which made our work on this project very efficient and productive.
-Special thanks to Professor Meinhard Kieser for his inspiration to this project 
+Special thanks to Prof. Meinhard Kieser for his inspiration to this project 
 and teaching of the theory behind sample size calculation.
 
 A click on the logo will lead you to the webpage of our Institute:
