@@ -60,7 +60,7 @@ ui <- navbarPage("samplesizr",
     )
   ),
   tabPanel("t test",#===========================================================
-    h2("Sample size calculation for the two-sided t-test"),
+    h2("Sample size calculation for the two-sided t test"),
     sidebarLayout(
      sidebarPanel(
         actionButton("t_button", "Calculate!", width = '100%'),
@@ -281,7 +281,7 @@ ui <- navbarPage("samplesizr",
   ),
  
   tabPanel("F test",#===========================================================
-    h2("Sample size calculation for the F-Test"),
+    h2("Sample size calculation for the F test"),
     h4("comparing k > 2 groups"),
     sidebarLayout(
      sidebarPanel(
