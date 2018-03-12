@@ -208,7 +208,7 @@ ui <- navbarPage("samplesizr",
           choiceNames = c("Intervention", "Control"), choiceValues = c(1,2)
         ),
         checkboxInput("chisq_power.exact",
-          "Berechnung zur exakten Power",
+          "Calculate with exact power",
           value = TRUE
         )
       ),
@@ -270,7 +270,7 @@ ui <- navbarPage("samplesizr",
           Level 3 uses low step width but will need a long time to calculate.
           WARNING. Using Level 1 might not deliver an accurate result."),
         checkboxInput("fb_exact",
-                      "Exakte Berechnung",
+                      "Exact calculation",
                       value = TRUE
         )
       ),
