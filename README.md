@@ -1,4 +1,7 @@
-Hello! Welcome to the samplesizr web application.
+Hello! Welcome to the *samplesizr* web application.
+***
+
+#### Introduction
 
 While planning a medical experiment or a clinical trial, the calculation of the sample size is essential.
 This web application gives you a fast first access to calculate the required sample
@@ -17,7 +20,7 @@ Springer Verlag.
 This app cannot replace the judgement and expertise of a biometrician 
 required to perform a valid sample size calculation by considering the specific details of your study.
 It provides a tool for the computational part of sample size calculation for a variety of common statistical tests.
-
+***
 
 #### Example
 
@@ -31,6 +34,7 @@ To achieve a decision in favour of the new intervention, given the intervention 
 You want to tolerate a maximal type I error rate of 0.05 (two-sided) / 0.025 (one-sided).
 You know that the standard deviation will be 20 points.
 Choose the tab 'z-test' above and click 'Calculate' to look up the results!
+***
 
 #### About samplesizr
 
