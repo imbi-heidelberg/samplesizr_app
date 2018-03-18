@@ -260,21 +260,22 @@ ui <- navbarPage("samplesizr",
         radioButtons("fb_r_x_or_y", "Larger group",  
           choiceNames = c("Intervention", "Control"), choiceValues = c(1,2)
         ),
-        radioButtons("fb_calc_speed", "Level of accuracy",
-                     choices = c("1" = .05,"2" = .01,"3" = .001),
+        radioButtons("fb_calc_speed", "Calculation speed",
+                     choices = c("1" = .001,"2" = .01,"3" = .05),
                      selected = .001,
                      inline = TRUE
         ),
         p("Note: This defines the step width the algorithm is working with.
-          Level 1 uses high step width for a fast calculation.
-          Level 3 uses low step width but will need a long time to calculate.
-          WARNING. Using Level 1 might not deliver an accurate result."),
+          Level 1 uses low step width for a fast calculation.
+          Level 3 uses higher step width but will need a long time to calculate.
+          Use the R package for best accuracy."),
         checkboxInput("fb_exact",
-                      "Exact calculation",
+                      "Calculation to exact power",
                       value = TRUE
         )
       ),
       mainPanel(
+        htmlOutput("fb_information"),
         verbatimTextOutput("fisher_boschloo")
       )
     )
@@ -367,9 +368,17 @@ ui <- navbarPage("samplesizr",
      )
    )
   ),
-  inverse = TRUE,
-  footer = "[1] M. Kieser, Fallzahlberechnung in der medizinischen 
-     Forschung (2018), 1th Edition, Springer"
+  inverse = TRUE,#==============================================================
+  footer = tags$ul(
+    style = "list-style-type:none",
+    tags$li("[1] Kieser, M.: Fallzahlberechnung in der medizinischen 
+     Forschung (2018), 1th Edition, Springer."),
+    tags$li("[2] Wellek, S.: Nearly exact sample size calculation for powerful
+     non-randomized tests for differences between binomial proportions.
+     Statistica Neerlandica 69, 358-373."),
+    tags$li("[3] Boschloo, R. D. Raised conditional of significance for the 2x2 table when
+     testing the equality of thwo probabilities.")
+  )
 )
 
 
@@ -602,6 +611,17 @@ server <- function(input, output) {
   
 # fisher boschloo test =========================================================
 
+  output$fb_information <- renderUI({
+    HTML(paste(
+      "Here you can perform a sample size calculation for the Fisher-Boschloo test.
+The absolute rate difference is used for quantifying the effect of an intervention.",
+      "Special Thanks to Professor S. Wellek [2] for providing the iterative algorithm which is used here.",
+      "Look up p. 26 - 28 in [1] for further Details.",
+      sep = "<br/>"
+      )
+    )
+})
+  
   fb_input <- eventReactive(input$fb_button,{
     p_Y   <- input$fb_p_Y
     p_X   <- input$fb_p_X

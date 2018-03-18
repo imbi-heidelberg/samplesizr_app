@@ -4,22 +4,17 @@ Hello! Welcome to the *samplesizr* web application.
 #### Introduction
 
 While planning a medical experiment or a clinical trial, the calculation of the sample size is essential.
-This web application gives you a fast first access to calculate the required sample
-size for your project. 
+This web application gives you a fast first access to calculate the required sample size for your project. 
 On the panel above, you can choose the statistical test you plan to
 perform. Choose the input parameters and press 'Calculate!' to perform the
 sample size calculation.
 
 For an introduction to sample size calcuation for clinical trials and
-to understand the theory behind this application the following book may be helpful.
-This application developed on basis of the calculations presented in this book.
+to understand the theory behind this application the following book may be helpful:
 
 > [1] M.Kieser: Fallzahlberechnung in der medizinischen Forschung [2018], 1th Edition,
 Springer Verlag.
 
-This app cannot replace the judgement and expertise of a biometrician 
-required to perform a valid sample size calculation by considering the specific details of your study.
-It provides a tool for the computational part of sample size calculation for a variety of common statistical tests.
 ***
 
 #### Example
@@ -33,18 +28,60 @@ To achieve a decision in favour of the new intervention, given the intervention 
 'better' by this amount, a probability of at least 0.9 (power) is desired.
 You want to tolerate a maximal type I error rate of 0.05 (two-sided) / 0.025 (one-sided).
 You know that the standard deviation will be 20 points.
-Choose the tab 'z-test' above and click 'Calculate' to look up the results!
+
+The Results:
+
+First the Input parameters will be reported:
+
+    Significance level : 0.050
+    Desired power : 90.00 %
+    Effect size : 10.00
+    Standard deviation : 20.00
+    Allocation : 1.00.
+
+Allocation is defined as the ratio (n intervention group) : (n control group).
+The resulting sample size and the actual power using this sample size is reported:
+
+    n control group : 85
+    n intervention group : 85
+    n total : 170
+    Actual power : 90.31373 %.
+    
+***
+
+#### R package
+
+This application developed on basis of the calculations presented by M. Kieser [1]
+and uses the functions provided by the R package *samplesizr*. 
+To install the R package follow these steps.
+
+Install and load the R package devtools:
+
+    install.packages(devtools)
+    library(devtools)
+    
+Install the *samplesizr* package from github.com:
+
+    install_github('imbi-heidelberg/samplesizr')
+
+Load the package and look up the documentation for an overview:
+
+    library(samplesizr)
+    ?samplesizr
+
+The R package includes the functions needed to calculate power and sample-size
+for each test. The power function for ANCOVA is not included.
 ***
 
 #### About samplesizr
 
-Samplesizr is a web application based on the R package 
-<a href="https://github.com/goseberg/samplesizr">
+*samplesizr* is a web application based on the R package 
+<a href="https://github.com/imbi-heidelberg/samplesizr">
 samplesizr.
 </a> 
 Special thanks to Kevin Kunzmann for his supervision, patience and help whilst 
 teaching me the tools which made our work on this project very efficient and productive.
-Special thanks to Prof. Meinhard Kieser for his inspiration to this project 
+Special thanks to Professor Meinhard Kieser for his inspiration to this project 
 and teaching of the theory behind sample size calculation.
 
 A click on the logo will lead you to the webpage of our Institute:
@@ -55,4 +92,4 @@ A click on the logo will lead you to the webpage of our Institute:
 
 Daniel Goseberg,  
 IMBI Heidelberg,  
-March 12th in Heidelberg
+March 16th in Heidelberg
