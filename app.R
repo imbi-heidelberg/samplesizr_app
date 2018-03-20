@@ -161,7 +161,7 @@ ui <- navbarPage("samplesizr",
       )
     )
   ),
-  tabPanel("Chi-square test",#==================================================
+  tabPanel("Chi-square test (k = 2)",#==================================================
     h2("Sample size calculation for the Chi-Square test"),
     sidebarLayout(
       sidebarPanel(
@@ -170,11 +170,15 @@ ui <- navbarPage("samplesizr",
         h4("Planning assumptions"),
         numericInput("chisq_p_Y",
           label = "Event rate: intervention group",
+          min = 0,
+          max = 1,
           value = .5, 
           step = .001
         ),
         numericInput("chisq_p_X",
           label = "Event rate: control group",
+          min = 0,
+          max = 1,
           value = .3, 
           step = .001
         ),
@@ -226,11 +230,15 @@ ui <- navbarPage("samplesizr",
         h4("Planning assumptions"),
         numericInput("fb_p_Y",
           label = "Event rate: intervention group",
+          min = 0,
+          max = 1,
           value = .5, 
           step = .001
         ),
         numericInput("fb_p_X",
           label = "Event rate: control group",
+          min = 0,
+          max = 1,
           value = .3, 
           step = .001
         ),
@@ -266,8 +274,8 @@ ui <- navbarPage("samplesizr",
                      inline = TRUE
         ),
         p("Note: This defines the step width the algorithm is working with.
-          Level 1 uses low step width for a fast calculation.
-          Level 3 uses higher step width but will need a long time to calculate.
+          Level 1 uses low step width and will need a long time to calculatea.
+          Level 3 uses higher step width for fast calculation.
           Use the R package for best accuracy."),
         checkboxInput("fb_exact",
                       "Calculation to exact power",
@@ -327,7 +335,7 @@ ui <- navbarPage("samplesizr",
       )
     )
   ),
-  tabPanel("Chi-square test",#==================================================
+  tabPanel("Chi-square test (k > 2)",#==================================================
     h2("Sample size calculation for the Chi-square test"),
     h4("comparing k > 2 groups"),
     sidebarLayout(
@@ -371,13 +379,12 @@ ui <- navbarPage("samplesizr",
   inverse = TRUE,#==============================================================
   footer = tags$ul(
     style = "list-style-type:none",
+    tags$li("k: Number of groups."),
     tags$li("[1] Kieser, M.: Fallzahlberechnung in der medizinischen 
      Forschung (2018), 1th Edition, Springer."),
     tags$li("[2] Wellek, S.: Nearly exact sample size calculation for powerful
      non-randomized tests for differences between binomial proportions.
-     Statistica Neerlandica 69, 358-373."),
-    tags$li("[3] Boschloo, R. D. Raised conditional of significance for the 2x2 table when
-     testing the equality of thwo probabilities.")
+     Statistica Neerlandica 69, 358-373.")
   )
 )
 
@@ -834,13 +841,13 @@ The absolute rate difference is used for quantifying the effect of an interventi
       p_number_name <- paste("p_", my_i, sep="")
       
       output[[p_number_name]] <- renderUI({
-        sliderInput(
+        numericInput(
           p_number_name,
           paste0("Rate: group ", my_i),
           min = 0,
           max = 1,
           value = .5,
-          step = .005
+          step = .001
         )
       })
     })
