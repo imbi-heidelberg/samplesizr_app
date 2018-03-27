@@ -3,7 +3,6 @@
 # the 'Run App' button above.
 
 library(shiny)
-library(markdown)
 library(samplesizr)
 library(tidyverse)
 
@@ -162,7 +161,7 @@ ui <- navbarPage("samplesizr",
     )
   ),
   tabPanel("Chi-square test (k = 2)",#==================================================
-    h2("Sample size calculation for the Chi-Square test"),
+    h2("Sample size calculation for the two-sided Chi-Square test"),
     sidebarLayout(
       sidebarPanel(
         actionButton("chisq_button", "Calculate!", width = '100%'),
@@ -188,10 +187,10 @@ ui <- navbarPage("samplesizr",
         tags$hr(),
         h4("Type I/II error characteristics"),
         sliderInput("chisq_alpha",
-          "Maximal Type I error rate",
+          "Maximal Type I error rate (one-sided)",
           min = .005,
           max = .2,
-          value = .05, 
+          value = .025, 
           step = .001
         ),
         sliderInput("chisq_pwr",
@@ -416,18 +415,27 @@ server <- function(input, output) {
   
   z_output <- reactive({
     
-    input$z_button
-    
-    z_in  <- z_input_lazy()
- 
-    z_out <- n_ztest(
-      effect = z_in$mu_y - z_in$mu_x,
-      sd     = z_in$sd,
-      alpha  = z_in$alpha, 
-      power  = z_in$power, 
-      r      = z_in$r
+    withProgress(
+      message = "Calculating sample-size",
+      detail  = "z-test (k = 2)",
+      min = 0,
+      max = 1,
+      value = .5,
+      {
+        input$z_button
+        
+        z_in  <- z_input_lazy()
+     
+        z_out <- n_ztest(
+          effect = z_in$mu_y - z_in$mu_x,
+          sd     = z_in$sd,
+          alpha  = z_in$alpha, 
+          power  = z_in$power, 
+          r      = z_in$r
+        )
+        return(z_out)
+      }
     )
-    return(z_out)
   })
   
   output$ztest <- renderPrint({ print(z_output()) })
@@ -557,18 +565,28 @@ server <- function(input, output) {
   
   t_output <- reactive({
     
-    input$t_button
+    withProgress(
+      message = "Calculating sample-size",
+      detail  = "t-test (k = 2)",
+      min = 0,
+      max = 1,
+      value = .5,
+      {
     
-    t_in  <- t_input_lazy()
-    
-    t_out <- n_ttest(
-      effect = t_in$mu_y - t_in$mu_x,
-      sd     = t_in$sd,
-      alpha  = t_in$alpha, 
-      power  = t_in$power, 
-      r      = t_in$r
+        input$t_button
+        
+        t_in  <- t_input_lazy()
+        
+        t_out <- n_ttest(
+          effect = t_in$mu_y - t_in$mu_x,
+          sd     = t_in$sd,
+          alpha  = t_in$alpha, 
+          power  = t_in$power, 
+          r      = t_in$r
+        )
+        return(t_out)
+      }
     )
-    return(t_out)
   })
   
   output$ttest <- renderPrint({ print(t_output()) })
@@ -600,17 +618,26 @@ server <- function(input, output) {
     
     input$chisq_button
     
-    chisq_in  <- chisq_input_lazy()
-    
-    chisq_out  <- n_chisq(
-      p_Y    = chisq_in$p_Y,
-      p_X    = chisq_in$p_X,
-      alpha  = chisq_in$alpha, 
-      power  = chisq_in$power, 
-      r      = chisq_in$r,
-      power.exact = chisq_in$power.exact
+    withProgress(
+      message = "Calculating sample-size",
+      detail  = "Chi-square test (k = 2)",
+      min = 0,
+      max = 1,
+      value = .5,
+      {
+        chisq_in  <- chisq_input_lazy()
+        
+        chisq_out  <- n_chisq(
+          p_Y    = chisq_in$p_Y,
+          p_X    = chisq_in$p_X,
+          alpha  = chisq_in$alpha, 
+          power  = chisq_in$power, 
+          r      = chisq_in$r,
+          power.exact = chisq_in$power.exact
+        )
+        return(chisq_out)
+      }
     )
-    return(chisq_out)
   })
   
   output$chisq <- renderPrint({ print(chisq_output()) })
@@ -653,20 +680,29 @@ The absolute rate difference is used for quantifying the effect of an interventi
   
   fb_output <- reactive({
     
-    input$fb_button
-    
-    fb_in  <- fb_input_lazy()
-    
-    fb_out  <- n_fisher_boschloo(
-      p_Y    = fb_in$p_Y,
-      p_X    = fb_in$p_X,
-      alpha  = fb_in$alpha, 
-      power  = fb_in$power, 
-      r      = fb_in$r,
-      exact  = fb_in$exact,
-      SW     = fb_in$SW
+    withProgress(
+      message = "Calculating sample-size",
+      detail  = "Fisher-Boschloo test (k = 2)",
+      min = 0,
+      max = 1,
+      value = .5,
+      {
+        input$fb_button
+        
+        fb_in  <- fb_input_lazy()
+        
+        fb_out  <- n_fisher_boschloo(
+          p_Y    = fb_in$p_Y,
+          p_X    = fb_in$p_X,
+          alpha  = fb_in$alpha, 
+          power  = fb_in$power, 
+          r      = fb_in$r,
+          exact  = fb_in$exact,
+          SW     = fb_in$SW
+        )
+        return(fb_out)
+      }
     )
-    return(fb_out)
   })
   
   output$fisher_boschloo <- renderPrint({ print(fb_output()) })
@@ -698,21 +734,29 @@ The absolute rate difference is used for quantifying the effect of an interventi
   })
   
   ancova_output <- reactive({
-    
-    input$ancova_button
-    
-    ancova_in  <- ancova_input_lazy()
-    
-    ancova_out <- n_ancova(
-      effect = ancova_in$mu_y - ancova_in$mu_x,
-      corr   = ancova_in$corr,
-      sd     = ancova_in$sd,
-      alpha  = ancova_in$alpha, 
-      power  = ancova_in$power, 
-      r      = ancova_in$r,
-      gs     = ancova_in$gs
+    withProgress(
+      message = "Calculating sample-size",
+      detail  = "ANCOVA (k = 2)",
+      min = 0,
+      max = 1,
+      value = .5,
+      {
+        input$ancova_button
+        
+        ancova_in  <- ancova_input_lazy()
+        
+        ancova_out <- n_ancova(
+          effect = ancova_in$mu_y - ancova_in$mu_x,
+          corr   = ancova_in$corr,
+          sd     = ancova_in$sd,
+          alpha  = ancova_in$alpha, 
+          power  = ancova_in$power, 
+          r      = ancova_in$r,
+          gs     = ancova_in$gs
+        )
+        return(ancova_out)
+      }
     )
-    return(ancova_out)
   })
   
   output$ancova <- renderPrint({ print(ancova_output()) })
@@ -741,21 +785,30 @@ The absolute rate difference is used for quantifying the effect of an interventi
   
   f_output <- reactive({
     
-    input$f_button
+    withProgress(
+      message = "Calculating sample-size",
+      detail  = "F test (k > 2)",
+      min = 0,
+      max = 1,
+      value = .5,
+      {
+        input$f_button
     
-    f_in  <- f_input_lazy()
-
+        f_in  <- f_input_lazy()
     
-    if (any(f_in$mu_A != 0)){
-      f_out <- n_ftest(
-        mu_A = f_in$mu_A,
-        sd   = f_in$sd,
-        n.groups = f_in$n.groups,
-        alpha = f_in$alpha, 
-        power = f_in$power
-      )
-    }
-    return(f_out)
+        
+        if (any(f_in$mu_A != 0)){
+          f_out <- n_ftest(
+            mu_A = f_in$mu_A,
+            sd   = f_in$sd,
+            n.groups = f_in$n.groups,
+            alpha = f_in$alpha, 
+            power = f_in$power
+          )
+        }
+        return(f_out)
+      }
+    )
   })
   
   output$f <- renderPrint({ print(f_output()) })
@@ -808,20 +861,29 @@ The absolute rate difference is used for quantifying the effect of an interventi
   
   chisq_m_output <- reactive({
     
-    input$chisq_m_button
-    
-    chisq_m_in  <- chisq_m_input_lazy()
-    
-    
-    if (any(chisq_m_in$p_A != .5)){
-      chisq_m_out <- n_chisq_mult_groups(
-        p_A = chisq_m_in$p_A,
-        n.groups = chisq_m_in$n.groups,
-        alpha = chisq_m_in$alpha, 
-        power = chisq_m_in$power
-      )
-    }
-    return(chisq_m_out)
+    withProgress(
+      message = "Calculating sample-size",
+      detail  = "Chi-square test (k > 2)",
+      min = 0,
+      max = 1,
+      value = .5,
+          {
+        input$chisq_m_button
+        
+        chisq_m_in  <- chisq_m_input_lazy()
+        
+        
+        if (any(chisq_m_in$p_A != .5)){
+          chisq_m_out <- n_chisq_mult_groups(
+            p_A = chisq_m_in$p_A,
+            n.groups = chisq_m_in$n.groups,
+            alpha = chisq_m_in$alpha, 
+            power = chisq_m_in$power
+          )
+        }
+        return(chisq_m_out)
+      }
+    )
   })
   
   output$chisq_mult_groups <- renderPrint({ print(chisq_m_output()) })
