@@ -797,7 +797,7 @@ The absolute rate difference is used for quantifying the effect of an interventi
         f_in  <- f_input_lazy()
     
         
-        if (any(f_in$mu_A != 0)){
+        if (!all(f_in$mu_A == f_in$mu_A[1])){
           f_out <- n_ftest(
             mu_A = f_in$mu_A,
             sd   = f_in$sd,
@@ -805,8 +805,10 @@ The absolute rate difference is used for quantifying the effect of an interventi
             alpha = f_in$alpha, 
             power = f_in$power
           )
+          return(f_out)
+        } else {
+          return("At least two means must be different under alternative!")
         }
-        return(f_out)
       }
     )
   })
@@ -872,16 +874,20 @@ The absolute rate difference is used for quantifying the effect of an interventi
         
         chisq_m_in  <- chisq_m_input_lazy()
         
+        # check if alternative is valid
         
-        if (any(chisq_m_in$p_A != .5)){
+        if (!all(chisq_m_in$p_A == chisq_m_in$p_A[1])){
           chisq_m_out <- n_chisq_mult_groups(
             p_A = chisq_m_in$p_A,
             n.groups = chisq_m_in$n.groups,
             alpha = chisq_m_in$alpha, 
             power = chisq_m_in$power
           )
+          return(chisq_m_out)
+        } else {
+          # altenative not valid
+          return("Rates may not be equal under alternative!")
         }
-        return(chisq_m_out)
       }
     )
   })
