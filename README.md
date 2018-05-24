@@ -1,4 +1,12 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
 Hello! Welcome to the *samplesizr* web application.
+
+<span style="color:red">Please note: This App currently isn't working with the Edge browser. Please use another browser such as Internet Explorer, Google Chrome, Firefox etc.</span>
+
 ***
 
 #### Introduction
