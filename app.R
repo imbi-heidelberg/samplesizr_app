@@ -273,7 +273,7 @@ ui <- navbarPage("samplesizr",
                      inline = TRUE
         ),
         p("Note: This defines the step width the algorithm is working with.
-          Level 1 uses low step width and will need a long time to calculatea.
+          Level 1 uses low step width and will need a long time to calculate.
           Level 3 uses higher step width for fast calculation.
           Use the R package for best accuracy."),
         checkboxInput("fb_exact",
